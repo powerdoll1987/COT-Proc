@@ -38,12 +38,72 @@ if __name__ == '__main__':
 #
 #    ust = selDatePrice.ix[-50:-1, 'PX_LAST']
     
-    ust = price.ix[-250:-1, 'PX_LAST']
-    
+    ust = price.ix[:, 'PX_LAST']    
 #    ust = np.float64(ust)
     
+    #找出高低点
     pivots = zz.peak_valley_pivots(ust, 0.015, -0.015)  
-    plot_pivots(ust, pivots)
+#    plot_pivots(ust, pivots)   
+    price['pivots'] = pivots
+#    price.to_excel('price with pivots.xls')
+    
+    #找出高低点对应的CFTC时间（顶点）
+    selPeakPrice = price[price.pivots == 1]
+    nextMonPeak = tf.findNearbyDate(selPeakPrice.index, 7, 'W-MON')
+    prevMonPeak = tf.findNearbyDate(selPeakPrice.index, -7, 'W-MON')
+    monPeak = pd.DataFrame()
+    monPeak['nextMon'] = nextMonPeak
+    monPeak['prevMon'] = prevMonPeak
+#    monPeak.to_excel('peak Mon.xls')
+    
+    #找出高低点对应的CFTC时间（底点）
+    selValleyPrice = price[price.pivots == -1]
+    nextMonValley = tf.findNearbyDate(selValleyPrice.index, 7, 'W-MON')
+    prevMonValley = tf.findNearbyDate(selValleyPrice.index, -7, 'W-MON')
+    monValley = pd.DataFrame()
+    monValley['nextMon'] = nextMonValley
+    monValley['prevMon'] = prevMonValley
+#    monValley.to_excel('valley Mon.xls')
+  
+    # 调整pos数据（标准化）  
+    strPCT = '_PCT'
+    strCHG = '_CHG'  
+    posPCT = pos.ix[:,:-1].copy()
+    posPCT.columns = pos.columns[:-1] + strPCT
+    i = 0    
+    while i < len(posPCT.columns):
+        posPCT.ix[:, i] = pos.ix[:, i] / pos.ix[:, -1]  # 占Open int比
+        i += 1       
+    posCHG = posPCT.diff()  # 每周变化
+    posPCT.index = posPCT.index.shift(6, 'D') #把日期index调整为下周一，和高低点日期一致
+    posCHG.index = posCHG.index.shift(6, 'D')
+    
+    # 找出高低点的时间
+    peakIdx = pd.DatetimeIndex(monPeak['prevMon'])
+    valleyIdx = pd.DatetimeIndex(monValley['prevMon'])    
+    
+    # pos在高低点的绝对值
+    posPCT_peak = posPCT.ix[peakIdx].copy()
+    posPCT_peak.dropna(inplace = True)  
+    posPCT_valley = posPCT.ix[valleyIdx].copy()   
+    posPCT_valley.dropna(inplace = True)  
+    
+    # pos在高低点的变化值
+    posCHG_peak = posCHG.ix[peakIdx].copy()
+    posCHG_peak.dropna(inplace = True)  
+    posCHG_valley = posCHG.ix[valleyIdx].copy()
+    posCHG_valley.dropna(inplace = True)  
+    
+    # 高低点的统计数据
+    des = posPCT.describe()
+    peakDes = posPCT_peak.describe()
+    valleyDes = posPCT_valley.describe()
+    
+    # 画每列的直方分布图
+    col = 6
+    posPCT_peak.ix[:,col].hist(bins = 50, alpha = 0.5, color = 'r')
+    posPCT_valley.ix[:,col].hist(bins = 50, alpha = 0.5, color = 'g')
+    posPCT.ix[:,col].hist(bins = 50, alpha = 0.5, color = 'b')
     
 #    pivots = zz.peak_valley_pivots(ust, 0.03, -0.03)
 #    plot_pivots(ust, pivots)
