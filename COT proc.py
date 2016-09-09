@@ -77,6 +77,7 @@ if __name__ == '__main__':
     # 调整pos数据（标准化:占open interest的比）----------------------------------------------------------------------------------------------------------  
     strPCT = '_PCT'
     strCHG = '_CHG'  
+    pos = pos.ix[600:, :]
     posPCT = pos.ix[:,:-1].copy()
     posPCT.columns = pos.columns[:-1] + strPCT
     i = 0    
@@ -98,7 +99,7 @@ if __name__ == '__main__':
     posCHG_valley = posCHG.ix[valleyIdx].copy().dropna()
     
     # pos在高低点的绝对值的Zscore
-    span = -12
+    span = -100
     strZS = '_SZ'
     colNames = list(posPCT.columns)
     newColNames = [x + strZS for x in colNames]
@@ -109,12 +110,12 @@ if __name__ == '__main__':
     posPCT_valley_ZS = posPCT_ZS.ix[valleyIdx].copy().dropna()
     
     # pos在高低点的变化值的Zscore
-    span = -25
+    span2 = -25
     strZS = '_SZ'
     colNames = list(posCHG.columns)
     newColNames = [x + strZS for x in colNames]
     funcList = [tf.zscore] * len(posCHG.columns)    
-    posCHG_ZS = tf.rolling(posCHG.copy(), span, funcList, colNames, newColNames)\
+    posCHG_ZS = tf.rolling(posCHG.copy(), span2, funcList, colNames, newColNames)\
     .ix[:, len(posCHG.columns):-1 ].dropna()    
     posCHG_peak_ZS = posCHG_ZS.ix[peakIdx].copy().dropna()
     posCHG_valley_ZS = posCHG_ZS.ix[valleyIdx].copy().dropna()
@@ -125,6 +126,7 @@ if __name__ == '__main__':
     valleyDes = posPCT_valley.describe()
     
     # 合并pos和价格
+    monPrice['pivots'] = 0
     monPrice.ix[peakIdx, 'pivots'] = 1
     monPrice.ix[valleyIdx, 'pivots'] = -1
     posPCT_M = pd.concat([monPrice, posPCT], axis = 1, join = 'inner')
@@ -141,7 +143,7 @@ if __name__ == '__main__':
 #    figList = []
 #    while i < len(posPCT.columns):
 #        figList.append(plt.figure())
-#        plt.title(posPCT.columns[i])        
+#        plt.title(posPCT.columns[i]  + ' ' + str(span))        
 #        posPCT_peak.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'r')
 #        posPCT_valley.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'g')
 #        posPCT.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'b')
@@ -153,34 +155,34 @@ if __name__ == '__main__':
 #    figList = []
 #    while i < len(posCHG.columns):
 #        figList.append(plt.figure())
-#        plt.title(posCHG.columns[i])        
+#        plt.title(posCHG.columns[i]  + ' ' + str(span2))        
 #        posCHG_peak.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'r')
 #        posCHG_valley.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'g')
 #        posCHG.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'b')
 #        i += 1
     
 
-#    # 画每列的直方分布图(Open interest pct Zscore)
-#    i = 0 
-#    figList = []
-#    while i < len(posPCT_ZS.columns):
-#        figList.append(plt.figure())
-#        plt.title(posPCT_ZS.columns[i] + ' ' + str(span))        
-#        posPCT_peak_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'r')
-#        posPCT_valley_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'g')
-#        posPCT_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'b')
-#        i += 1
-
     # 画每列的直方分布图(Open interest pct Zscore)
     i = 0 
     figList = []
-    while i < len(posCHG_ZS.columns):
+    while i < len(posPCT_ZS.columns):
         figList.append(plt.figure())
-        plt.title(posCHG_ZS.columns[i] + ' ' + str(span))        
-        posCHG_peak_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'r')
-        posCHG_valley_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'g')
-        posCHG_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'b')
+        plt.title(posPCT_ZS.columns[i] + ' ' + str(span))        
+        posPCT_peak_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'r')
+        posPCT_valley_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'g')
+        posPCT_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'b')
         i += 1
+
+#    # 画每列的直方分布图(Open interest pct Zscore)
+#    i = 0 
+#    figList = []
+#    while i < len(posCHG_ZS.columns):
+#        figList.append(plt.figure())
+#        plt.title(posCHG_ZS.columns[i] + ' ' + str(span2))        
+#        posCHG_peak_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'r')
+#        posCHG_valley_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'g')
+#        posCHG_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'b')
+#        i += 1
     
 #    pivots = zz.peak_valley_pivots(ust, 0.03, -0.03)
 #    plot_pivots(ust, pivots)
