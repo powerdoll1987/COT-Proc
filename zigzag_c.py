@@ -6,7 +6,7 @@ Created on Fri Sep  2 11:40:27 2016
 """
 
 import numpy as np
-
+import pylab as pl
 # Numba can be a pain to install. If you do not have numba, the functions 
 # will be left in their original, uncompiled form. 
 #try:
@@ -52,7 +52,7 @@ def _identify_initial_pivot(X, up_thresh, down_thresh):
     return VALLEY if x_0 < X[t_n] else PEAK
 
 
-
+# 需要被调用的主函数
 def peak_valley_pivots(X, up_thresh, down_thresh):
     """
     Finds the peaks and valleys of a series.
@@ -183,3 +183,12 @@ def pivots_to_modes(pivots):
         else:
             modes[t] = mode
     return modes
+
+# 画图用函数
+def plot_pivots(X, pivots):
+    pl.xlim(0, len(X))
+    pl.ylim(X.min()*0.99, X.max()*1.01)
+    pl.plot(np.arange(len(X)), X, 'k:', alpha=0.8)
+    pl.plot(np.arange(len(X))[pivots != 0], X[pivots != 0], 'k-')
+    pl.scatter(np.arange(len(X))[pivots == 1], X[pivots == 1], color='g')
+    pl.scatter(np.arange(len(X))[pivots == -1], X[pivots == -1], color='r')
