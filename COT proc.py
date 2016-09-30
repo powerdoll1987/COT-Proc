@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Aug 31 11:29:38 2016
-
+计算价格极值时各个CFTC指标的分布情况
 @author: yiran.zhou
 """
 
@@ -27,9 +27,9 @@ def plot_pivots(X, pivots):
 if __name__ == '__main__':
     
     # 读入数据
-    pos = pd.read_excel('INPUT COT.xls', sheetname = 'Sheet1 (2)')
+    pos = pd.read_excel('INPUT COT TYA.xls', sheetname = 'Sheet1 (2)')
     pos.set_index('Date', inplace = True)
-    price = pd.read_excel('INPUT COT.xls', sheetname = 'Sheet2')
+    price = pd.read_excel('INPUT COT TYA.xls', sheetname = 'Sheet2')
     label = price.columns[0]
     price.set_index(label, inplace = True)
 
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     # 调整pos数据（标准化:占open interest的比）----------------------------------------------------------------------------------------------------------  
     strPCT = '_PCT'
     strCHG = '_CHG'  
-    pos = pos.ix[600:, :]
+#    pos = pos.ix[600:, :]
     posPCT = pos.ix[:,:-1].copy()
     posPCT.columns = pos.columns[:-1] + strPCT
     i = 0    
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     newColNames = [x + strZS for x in colNames]
     funcList = [tf.zscore] * len(posPCT.columns)    
     posPCT_ZS = tf.rolling(posPCT.copy(), span, funcList, colNames, newColNames)\
-    .ix[:, len(posPCT.columns):-1 ].dropna()    
+    .ix[:, len(posPCT.columns):].dropna()    
     posPCT_peak_ZS = posPCT_ZS.ix[peakIdx].copy().dropna()
     posPCT_valley_ZS = posPCT_ZS.ix[valleyIdx].copy().dropna()
     
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     newColNames = [x + strZS for x in colNames]
     funcList = [tf.zscore] * len(posCHG.columns)    
     posCHG_ZS = tf.rolling(posCHG.copy(), span2, funcList, colNames, newColNames)\
-    .ix[:, len(posCHG.columns):-1 ].dropna()    
+    .ix[:, len(posCHG.columns):].dropna()    
     posCHG_peak_ZS = posCHG_ZS.ix[peakIdx].copy().dropna()
     posCHG_valley_ZS = posCHG_ZS.ix[valleyIdx].copy().dropna()
     
@@ -162,18 +162,18 @@ if __name__ == '__main__':
 #        i += 1
     
 
-    # 画每列的直方分布图(Open interest pct Zscore)
-    i = 0 
-    figList = []
-    while i < len(posPCT_ZS.columns):
-        figList.append(plt.figure())
-        plt.title(posPCT_ZS.columns[i] + ' ' + str(span))        
-        posPCT_peak_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'r')
-        posPCT_valley_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'g')
-        posPCT_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'b')
-        i += 1
-
 #    # 画每列的直方分布图(Open interest pct Zscore)
+#    i = 0 
+#    figList = []
+#    while i < len(posPCT_ZS.columns):
+#        figList.append(plt.figure())
+#        plt.title(posPCT_ZS.columns[i] + ' ' + str(span))        
+#        posPCT_peak_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'r')
+#        posPCT_valley_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'g')
+#        posPCT_ZS.ix[:,i].hist(bins = 50, alpha = 0.5, color = 'b')
+#        i += 1
+
+#    # 画每列的直方分布图(Open interest pct change Zscore)
 #    i = 0 
 #    figList = []
 #    while i < len(posCHG_ZS.columns):

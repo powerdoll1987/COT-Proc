@@ -30,6 +30,17 @@ Created on Mon Sep  5 19:23:48 2016
 #posCHG_M = pd.concat([monPrice, posCHG], axis = 1, join = 'inner')
 #posPCT_ZS_M = pd.concat([monPrice, posPCT_ZS], axis = 1, join = 'inner')
 
-posPCT_M.to_excel('posPCT_M.xls')
-posCHG_M.to_excel('posCHG_M.xls')
-posPCT_ZS_M.to_excel('posPCT_ZS_M.xls')
+#posPCT_M.to_excel('posPCT_M.xls')
+#posCHG_M.to_excel('posCHG_M.xls')
+#posPCT_ZS_M.to_excel('posPCT_ZS_M.xls')
+
+plt.figure()
+plt.title('test')
+a.ix[:,].hist(bins = 50,alpha = 0.5,color = 'r')
+b.ix[:,].hist(bins = 50,alpha = 0.5,color = 'g')
+
+#plt.figure()
+#plt.title(posPCT_ZS.columns[1] + ' ' + str(20))        
+#posPCT_peak_ZS.ix[:,1].hist(bins = 50, alpha = 0.5, color = 'r')
+#posPCT_valley_ZS.ix[:,1].hist(bins = 50, alpha = 0.5, color = 'g')
+#posPCT_ZS.ix[:,1].hist(bins = 50, alpha = 0.5, color = 'b')
